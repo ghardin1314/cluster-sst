@@ -13,9 +13,18 @@ declare module "sst" {
       "type": "sst.aws.Postgres"
       "username": string
     }
+    "ExecuteFn": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
     "GhVpc": {
       "bastion": string
       "type": "sst.aws.Vpc"
+    }
+    "Runner": {
+      "service": string
+      "type": "sst.aws.Service"
     }
     "ShardManager": {
       "service": string

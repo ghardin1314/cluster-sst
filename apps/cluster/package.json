@@ -3,8 +3,10 @@
   "version": "0.0.0",
   "scripts": {},
   "dependencies": {
+    "@effect-aws/lambda": "^1.5.1",
     "@effect/cluster": "^0.39.2",
     "@effect/platform-node": "^0.86.2",
+    "@effect/rpc": "^0.62.2",
     "@effect/sql-pg": "^0.39.1",
     "effect": "^3.16.8",
     "sst": "3.17.5"

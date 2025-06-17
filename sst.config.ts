@@ -40,10 +40,31 @@ export default $config({
       },
       dev: {
         autostart: true,
-        command: "bun run src/shard-manager.ts",
+        command: "bun run --watch src/shard-manager.ts",
         directory: "apps/cluster",
       },
       link: [postgres],
+      capacity: "spot",
+    });
+
+    const runner = new sst.aws.Service("Runner", {
+      cluster,
+      image: {
+        context: "apps/cluster",
+        dockerfile: "Dockerfile",
+      },
+      dev: {
+        autostart: true,
+        command: "bun run --watch src/runner.ts",
+        directory: "apps/cluster",
+      },
+      link: [postgres],
+    });
+
+    const executeFn = new sst.aws.Function("ExecuteFn", {
+      handler: "apps/cluster/src/execute.handler",
+      link: [shardManager, postgres],
+      url: true,
     });
   },
 });
