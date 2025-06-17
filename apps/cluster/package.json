@@ -1,0 +1,15 @@
+{
+  "name": "@cluster-sst/cluster",
+  "version": "0.0.0",
+  "scripts": {},
+  "dependencies": {
+    "@effect/cluster": "^0.39.2",
+    "@effect/platform-node": "^0.86.2",
+    "@effect/sql-pg": "^0.39.1",
+    "effect": "^3.16.8",
+    "sst": "3.17.5"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "8.10.150"
+  }
+}

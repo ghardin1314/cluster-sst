@@ -1,0 +1,33 @@
+{
+  "name": "cluster-sst",
+  "version": "1.0.0",
+  "description": "A pnpm monorepo for cluster-sst",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "clean": "pnpm -r clean",
+    "dev": "pnpm -r dev",
+    "install-all": "pnpm install",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test"
+  },
+  "keywords": [
+    "monorepo",
+    "pnpm",
+    "workspace"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/aws-lambda": "8.10.150",
+    "@types/node": "24.0.3",
+    "sst": "3.17.5",
+    "typescript": "5.8.3"
+  },
+  "engines": {
+    "pnpm": "10.11.0"
+  },
+  "dependencies": {
+    "sst": "3.17.5"
+  }
+}
