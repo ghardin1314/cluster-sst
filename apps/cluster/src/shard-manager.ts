@@ -7,7 +7,6 @@ import { Context, Effect, Layer, Logger, LogLevel } from "effect";
 import { DbLayer } from "./external/db";
 import { inEcs, IpAddress, ipLayer } from "./prelude";
 
-console.log(process.env.ECS_CONTAINER_METADATA_URI_V4);
 
 const program = ipLayer
   .pipe(
