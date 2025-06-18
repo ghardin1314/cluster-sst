@@ -1,5 +1,12 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+function privateDnsName() {
+  return `${$app.stage}.effect-cluster.private`;
+}
+function generateServiceHostname(serviceName: string) {
+  return `${serviceName}.${$app.name}.${privateDnsName()}`;
+}
+
 export default $config({
   app(input) {
     return {
@@ -15,7 +22,11 @@ export default $config({
     };
   },
   async run() {
-    const vpc = sst.aws.Vpc.get("GhVpc", "vpc-05d1d577a4f6787b5");
+    const vpc = $dev
+      ? sst.aws.Vpc.get("EClustVpc", "vpc-05d1d577a4f6787b5")
+      : new sst.aws.Vpc("EClustVpc", {
+          nat: "ec2",
+        });
 
     const postgres = new sst.aws.Postgres("EClustPostgres", {
       vpc,
@@ -35,36 +46,59 @@ export default $config({
     const shardManager = new sst.aws.Service("ShardManager", {
       cluster,
       image: {
-        context: "apps/cluster",
-        dockerfile: "Dockerfile",
+        context: ".",
+        dockerfile: "apps/cluster/Dockerfile",
       },
+      environment: {
+        // SHARD_MANAGER_HOST,
+        LOG_LEVEL: "DEBUG",
+      },
+      command: $dev
+        ? undefined
+        : ["bun", "run", "apps/cluster/src/shard-manager.ts"],
       dev: {
         autostart: true,
-        command: "bun run --watch src/shard-manager.ts",
+        command: "bun run --hot src/shard-manager.ts",
         directory: "apps/cluster",
       },
       link: [postgres],
       capacity: "spot",
     });
 
+    const SHARD_MANAGER_HOST = $dev
+      ? "localhost"
+      : // : generateServiceHostname("ShardManager");
+        shardManager.service;
+
     const runner = new sst.aws.Service("Runner", {
       cluster,
       image: {
-        context: "apps/cluster",
-        dockerfile: "Dockerfile",
+        context: ".",
+        dockerfile: "apps/cluster/Dockerfile",
       },
+      environment: {
+        SHARD_MANAGER_HOST,
+        PORT: "34431",
+        LOG_LEVEL: "DEBUG",
+      },
+      command: $dev ? undefined : ["bun", "run", "apps/cluster/src/runner.ts"],
       dev: {
         autostart: true,
-        command: "bun run --watch src/runner.ts",
+        command: "bun run --hot src/runner.ts",
         directory: "apps/cluster",
       },
       link: [postgres],
     });
 
     const executeFn = new sst.aws.Function("ExecuteFn", {
+      vpc,
       handler: "apps/cluster/src/execute.handler",
       link: [shardManager, postgres],
       url: true,
+      environment: {
+        SHARD_MANAGER_HOST,
+        LOG_LEVEL: "DEBUG",
+      },
     });
   },
 });

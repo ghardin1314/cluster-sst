@@ -1,11 +1,25 @@
+import { RunnerAddress } from "@effect/cluster";
 import { NodeClusterRunnerSocket, NodeRuntime } from "@effect/platform-node";
-import { Layer } from "effect";
+import { Context, Effect, Layer, Logger, LogLevel, Option } from "effect";
 import { GreeterLive } from "./entites/hello";
 import { DbLayer } from "./external/db";
+import { inEcs, IpAddress, ipLayer, Port, portLayer } from "./prelude";
 
-const RunnerLive = NodeClusterRunnerSocket.layer({
-  storage: "sql",
-});
+const RunnerLive = Layer.merge(ipLayer, portLayer).pipe(
+  Layer.flatMap((ctx) =>
+    NodeClusterRunnerSocket.layer({
+      storage: "sql",
+      shardingConfig: {
+        runnerAddress: Option.some(
+          RunnerAddress.make(
+            Context.get(ctx, IpAddress),
+            Context.get(ctx, Port)
+          )
+        ),
+      },
+    })
+  )
+);
 
 const Entities = Layer.mergeAll(GreeterLive);
 
@@ -15,4 +29,11 @@ const program = Entities.pipe(
   Layer.launch
 );
 
-program.pipe(NodeRuntime.runMain);
+const programWithLogger = inEcs
+  ? program.pipe(
+      Effect.provide(Logger.json),
+      Effect.provide(Logger.minimumLogLevel(LogLevel.Debug))
+    )
+  : program;
+
+programWithLogger.pipe(NodeRuntime.runMain({ disablePrettyLogger: inEcs }));

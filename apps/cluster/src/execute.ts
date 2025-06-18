@@ -3,15 +3,19 @@ import {
   type APIGatewayProxyEventV2,
   type EffectHandler,
 } from "@effect-aws/lambda";
-import type { Sharding } from "@effect/cluster";
+import { RunnerAddress, type Sharding } from "@effect/cluster";
 import { NodeClusterRunnerSocket } from "@effect/platform-node";
 import { Effect, Layer } from "effect";
 import { Greeter } from "./entites/hello";
 import { DbLayer } from "./external/db";
+import { Resource } from "sst";
 
 const LambdaClusterLayer = NodeClusterRunnerSocket.layer({
   clientOnly: true,
   storage: "sql",
+  shardingConfig: {
+    shardManagerAddress: RunnerAddress.make(Resource.ShardManager.service, 8080)
+  }
 }).pipe(Layer.provide(DbLayer));
 
 // Define your effect handler
