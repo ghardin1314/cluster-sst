@@ -1,93 +1,132 @@
-# cluster-sst
+# Effect Cluster on SST
 
-A pnpm monorepo for cluster-sst project.
+This repository demonstrates the simplest and most stripped-down way to deploy [Effect Cluster](https://effect.website/docs/cluster/introduction) using [SST](https://sst.dev). It showcases how to build a distributed system with Effect's functional programming approach, deployed entirely using basic SST components without any custom configuration.
 
-## Structure
+## Overview
 
-This monorepo is organized using the following structure:
+This project implements a minimal Effect Cluster deployment that includes:
+
+- **Shard Manager**: Central coordinator that manages cluster state and shard distribution
+- **Runner Services**: Worker nodes that execute business logic and host entities
+- **PostgreSQL Database**: Persistent storage for cluster and message state
+- **Lambda Function**: HTTP endpoint that acts as a client to interact with the cluster
+- **AWS Infrastructure**: VPC, ECS Cluster, and managed services via SST
+
+All infrastructure is defined in `sst.config.ts` using standard SST components - no custom or complex configurations required!
+
+## Architecture
 
 ```
-├── apps/          # Applications (frontend, backend, etc.)
-├── packages/      # Shared packages and libraries
-├── libs/          # Internal libraries
-├── tools/         # Development tools and utilities
-├── package.json   # Root package.json with workspace scripts
-└── pnpm-workspace.yaml # pnpm workspace configuration
+┌─────────────────┐     ┌──────────────────┐
+│  Lambda (HTTP)  │────▶│  Shard Manager   │
+└─────────────────┘     │    (ECS Task)    │
+                        └────────┬─────────┘
+                                 │
+                        ┌────────▼─────────┐
+                        │     Runner(s)    │
+                        │   (ECS Tasks)    │
+                        └────────┬─────────┘
+                                 │
+                        ┌────────▼─────────┐
+                        │   PostgreSQL     │
+                        │   (RDS/Local)    │
+                        └──────────────────┘
 ```
-
-## Prerequisites
-
-- Node.js >= 18
-- pnpm >= 8
 
 ## Getting Started
 
-1. Install dependencies:
+### Prerequisites
 
+1. **Install SST** - Follow the official SST installation guide at https://sst.dev/docs/workflow/
+
+2. **Clone this repository**
+   ```bash
+   git clone https://github.com/ghardin1314/cluster-sst.git
+   cd cluster-sst
+   ```
+
+3. **Install dependencies**
    ```bash
    pnpm install
    ```
 
-2. Build all packages:
+### Local Development
 
+1. **Start the PostgreSQL database**
    ```bash
-   pnpm build
+   docker compose up -d
    ```
 
-3. Run development mode for all packages:
+2. **Start SST in development mode**
    ```bash
-   pnpm dev
+   pnpm sst dev
    ```
 
-## Available Scripts
+   SST will start the local development environment and output the Lambda function URL.
 
-- `pnpm build` - Build all packages
-- `pnpm dev` - Run development mode for all packages
-- `pnpm test` - Run tests for all packages
-- `pnpm lint` - Lint all packages
-- `pnpm clean` - Clean build outputs for all packages
+   > Note: This will deploy some minimal resources to your AWS account. Remember to remove afterwards with `pnpm sst remove`
 
-## Working with Packages
+3. **Test the cluster**
+   
+   Once SST finishes starting up, you'll see output including a function URL. Use curl to test the cluster:
+   
+   ```bash
+   curl <your-function-url>
+   ```
 
-### Adding a new package
+   This will execute a request through the Lambda function to the Effect Cluster, demonstrating the full flow from HTTP request → Lambda → Shard Manager → Runner → Response.
 
-1. Create a new directory under the appropriate folder (`apps/`, `packages/`, `libs/`, or `tools/`)
-2. Initialize the package with `pnpm init` in the new directory
-3. Add dependencies specific to that package
+## How It Works
 
-### Adding dependencies
+1. **Shard Manager** (`apps/cluster/src/shard-manager.ts`): 
+   - Acts as the cluster coordinator
+   - Uses PostgreSQL to persist cluster state
+   - Manages shard assignment and entity distribution
 
-- **Add a dependency to a specific package:**
+2. **Runner** (`apps/cluster/src/runner.ts`):
+   - Worker nodes that host and execute entities
+   - Connect to the Shard Manager for coordination
+   - Can scale horizontally for increased capacity
 
-  ```bash
-  pnpm add <package> --filter <workspace-name>
-  ```
+3. **Entities** (`apps/cluster/src/entities/hello.ts`):
+   - Business logic encapsulated as Effect entities
+   - Example includes a `Greeter` entity with RPC methods
+   - Supports persistence and state management
 
-- **Add a dev dependency to a specific package:**
+4. **Lambda Handler** (`apps/cluster/src/execute.ts`):
+   - Provides HTTP access to the cluster
+   - Acts as a cluster client using `clientOnly` mode
+   - Deployed with a public URL for easy testing
 
-  ```bash
-  pnpm add -D <package> --filter <workspace-name>
-  ```
+## Key Features
 
-- **Add a dependency to the root:**
-  ```bash
-  pnpm add -w <package>
-  ```
+- **Minimal Configuration**: Uses only standard SST components
+- **Local Development**: Full local development support with hot reloading
+- **Production Ready**: Includes VPC, managed database, and auto-scaling
+- **Effect Ecosystem**: Leverages Effect's powerful functional programming capabilities
+- **Cost Efficient**: Uses ECS Spot instances for runners
 
-### Running scripts in specific packages
+## Deployment to AWS
+
+To deploy to AWS:
 
 ```bash
-pnpm --filter <workspace-name> <script>
+pnpm sst deploy --stage dev
 ```
 
-Example:
+SST will handle all the infrastructure provisioning including:
+- VPC with NAT gateway
+- RDS PostgreSQL instance  
+- ECS Cluster with services
+- Lambda function with public URL
 
-```bash
-pnpm --filter my-app dev
-```
+> Note: This does take some time to finish
 
-## Workspace Management
+## Inspired By
 
-This monorepo uses pnpm workspaces. The workspace configuration is defined in `pnpm-workspace.yaml`.
+This repository was inspired by [sellooh/effect-cluster-via-sst](https://github.com/sellooh/effect-cluster-via-sst), but focuses on providing the absolute simplest implementation using only standard SST components.
 
-For more information about pnpm workspaces, visit: https://pnpm.io/workspaces
+## Learn More
+
+- [Effect Documentation](https://effect.website)
+- [SST Documentation](https://sst.dev/docs)

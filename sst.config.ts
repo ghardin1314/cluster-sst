@@ -1,5 +1,7 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+import type { ServiceArgs } from ".sst/platform/src/components/aws";
+
 export default $config({
   app(input) {
     return {
@@ -7,7 +9,6 @@ export default $config({
       removal: input?.stage === "production" ? "retain" : "remove",
       protect: ["production"].includes(input?.stage),
       home: "aws",
-    
     };
   },
   async run() {
@@ -53,23 +54,47 @@ export default $config({
 
     const SHARD_MANAGER_HOST = $dev ? "localhost" : shardManager.service;
 
+    const runnerContainer = ({
+      index,
+      port,
+    }: {
+      index: number;
+      port: number;
+    }) => {
+      return {
+        memory: "0.25 GB",
+        name: `shard-runner-${index}`,
+        image: {
+          context: ".",
+          dockerfile: "apps/cluster/images/cluster-base.dockerfile",
+        },
+        // health: ... // Check https://github.com/sellooh/effect-cluster-via-sst for how to add a healthcheck endpoint
+        environment: {
+          SHARD_MANAGER_HOST,
+          PORT: port.toString(),
+          LOG_LEVEL: "DEBUG",
+        },
+        command: $dev
+          ? undefined
+          : ["bun", "run", "apps/cluster/src/runner.ts"],
+        dev: {
+          autostart: true,
+          command: "bun run --hot src/runner.ts",
+          directory: "apps/cluster",
+        },
+      } satisfies NonNullable<ServiceArgs["containers"]>[number];
+    };
+
     const runner = new sst.aws.Service("Runner", {
+      capacity: "spot", // For production, probably dont use only spot. Can use normal or a mixture
+      memory: "0.75 GB",
       cluster,
-      image: {
-        context: ".",
-        dockerfile: "apps/cluster/Dockerfile",
-      },
-      environment: {
-        SHARD_MANAGER_HOST,
-        PORT: "34431",
-        LOG_LEVEL: "DEBUG",
-      },
-      command: $dev ? undefined : ["bun", "run", "apps/cluster/src/runner.ts"],
-      dev: {
-        autostart: true,
-        command: "bun run --hot src/runner.ts",
-        directory: "apps/cluster",
-      },
+      // scaling: ... // For production, can set auto scaling based on CPU/memory usage
+      containers: [
+        runnerContainer({ index: 0, port: 34431 }),
+        runnerContainer({ index: 1, port: 34432 }),
+        runnerContainer({ index: 2, port: 34433 }),
+      ],
       link: [postgres],
     });
 
