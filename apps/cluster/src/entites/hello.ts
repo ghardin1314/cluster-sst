@@ -19,6 +19,9 @@ export const GreeterLive = Greeter.toLayer(
 
     return {
       Greet: Effect.fn(function* (args) {
+        yield* Effect.log(
+          `Greeting ${args.payload.name} from ${address.entityId} ${address.entityType} ${address.shardId}`
+        );
         return {
           message: `Hello, ${args.payload.name}! from ${address.entityId} ${address.entityType} ${address.shardId}`,
         };

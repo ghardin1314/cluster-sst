@@ -18,8 +18,8 @@ const RunnerLive = Layer.merge(ipLayer, portLayer).pipe(
           )
         ),
         shardManagerAddress: RunnerAddress.make(
-          Resource.ShardManager.service,
-          8080
+          Resource.ShardConfig.SHARD_MANAGER_HOST,
+          Resource.ShardConfig.SHARD_MANAGER_PORT
         ),
       },
     })

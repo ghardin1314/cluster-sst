@@ -25,6 +25,11 @@ declare module "sst" {
       "service": string
       "type": "sst.aws.Service"
     }
+    "ShardConfig": {
+      "SHARD_MANAGER_HOST": string
+      "SHARD_MANAGER_PORT": number
+      "type": "sst.sst.Linkable"
+    }
     "ShardManager": {
       "service": string
       "type": "sst.aws.Service"

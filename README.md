@@ -64,7 +64,9 @@ All infrastructure is defined in `sst.config.ts` using standard SST components -
 
    SST will start the local development environment and output the Lambda function URL.
 
-   > Note: This will deploy some minimal resources to your AWS account. Remember to remove afterwards with `pnpm sst remove`
+   > Note: In local development, the database and all code runs locally using `sst dev` but resembles the production deployment as closely as possible.
+
+   > Note: This will deploy some minimal resources to your AWS account. The database and all code runs locally, but resembles a production deployment as closely as possible. Remember to remove afterwards with `pnpm sst remove`
 
 3. **Test the cluster**
    
@@ -121,6 +123,8 @@ SST will handle all the infrastructure provisioning including:
 - Lambda function with public URL
 
 > Note: This does take some time to finish
+
+> Remember: remove all resources from your AWS account with `pnpm sst remove --stage dev`
 
 ## Inspired By
 

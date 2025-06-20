@@ -53,6 +53,13 @@ export default $config({
     });
 
     const SHARD_MANAGER_HOST = $dev ? "localhost" : shardManager.service;
+    const SHARD_MANAGER_PORT = 8080;
+     const ShardConfig = new sst.Linkable("ShardConfig", {
+      properties: {
+        SHARD_MANAGER_HOST,
+        SHARD_MANAGER_PORT,
+      },
+    });
 
     const runnerContainer = ({
       index,
@@ -66,7 +73,7 @@ export default $config({
         name: `shard-runner-${index}`,
         image: {
           context: ".",
-          dockerfile: "apps/cluster/images/cluster-base.dockerfile",
+          dockerfile: "apps/cluster/Dockerfile",
         },
         // health: ... // Check https://github.com/sellooh/effect-cluster-via-sst for how to add a healthcheck endpoint
         environment: {
@@ -86,21 +93,22 @@ export default $config({
 
     const runner = new sst.aws.Service("Runner", {
       capacity: "spot", // For production, probably dont use only spot. Can use normal or a mixture
-      memory: "0.75 GB",
+      memory: "1 GB",
       cluster,
       // scaling: ... // For production, can set auto scaling based on CPU/memory usage
       containers: [
         runnerContainer({ index: 0, port: 34431 }),
         runnerContainer({ index: 1, port: 34432 }),
         runnerContainer({ index: 2, port: 34433 }),
+        runnerContainer({ index: 3, port: 34434 }),
       ],
-      link: [postgres, shardManager],
+      link: [postgres, shardManager, ShardConfig],
     });
 
     const executeFn = new sst.aws.Function("ExecuteFn", {
       vpc,
       handler: "apps/cluster/src/execute.handler",
-      link: [shardManager, postgres],
+      link: [shardManager, postgres, ShardConfig],
       url: true,
       environment: {
         LOG_LEVEL: "DEBUG",
