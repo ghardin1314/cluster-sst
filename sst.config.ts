@@ -45,7 +45,7 @@ export default $config({
         : ["bun", "run", "apps/cluster/src/shard-manager.ts"],
       dev: {
         autostart: true,
-        command: "bun run --hot src/shard-manager.ts",
+        command: "bun run --watch src/shard-manager.ts",
         directory: "apps/cluster",
       },
       link: [postgres],
@@ -79,7 +79,7 @@ export default $config({
           : ["bun", "run", "apps/cluster/src/runner.ts"],
         dev: {
           autostart: true,
-          command: "bun run --hot src/runner.ts",
+          command: "bun run --watch src/runner.ts",
           directory: "apps/cluster",
         },
       } satisfies NonNullable<ServiceArgs["containers"]>[number];
