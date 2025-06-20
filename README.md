@@ -1,6 +1,6 @@
 # Effect Cluster on SST
 
-This repository demonstrates the simplest and most stripped-down way to deploy [Effect Cluster](https://effect.website/docs/cluster/introduction) using [SST](https://sst.dev). It showcases how to build a distributed system with Effect's functional programming approach, deployed entirely using basic SST components without any custom configuration.
+This repository demonstrates the simplest and most stripped-down way to deploy [Effect Cluster](https://effect-ts.github.io/effect/cluster) using [SST](https://sst.dev). It showcases how to build a distributed system with Effect's functional programming approach, deployed entirely using basic SST components without any custom configuration.
 
 ## Overview
 
