@@ -70,7 +70,6 @@ export default $config({
         },
         // health: ... // Check https://github.com/sellooh/effect-cluster-via-sst for how to add a healthcheck endpoint
         environment: {
-          SHARD_MANAGER_HOST,
           PORT: port.toString(),
           LOG_LEVEL: "DEBUG",
         },
@@ -95,7 +94,7 @@ export default $config({
         runnerContainer({ index: 1, port: 34432 }),
         runnerContainer({ index: 2, port: 34433 }),
       ],
-      link: [postgres],
+      link: [postgres, shardManager],
     });
 
     const executeFn = new sst.aws.Function("ExecuteFn", {
@@ -104,7 +103,6 @@ export default $config({
       link: [shardManager, postgres],
       url: true,
       environment: {
-        SHARD_MANAGER_HOST,
         LOG_LEVEL: "DEBUG",
       },
     });

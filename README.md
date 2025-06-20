@@ -103,8 +103,8 @@ All infrastructure is defined in `sst.config.ts` using standard SST components -
 - **Minimal Configuration**: Uses only standard SST components
 - **Local Development**: Full local development support with hot reloading
 - **Production Ready**: Includes VPC, managed database, and auto-scaling
-- **Effect Ecosystem**: Leverages Effect's powerful functional programming capabilities
-- **Cost Efficient**: Uses ECS Spot instances for runners
+- **Effect Ecosystem**: Leverages Effect's powerful capabilities
+- **Minimal Typesafe Config**: Uses SST bindings to eliminate the need for special env vars.
 
 ## Deployment to AWS
 
