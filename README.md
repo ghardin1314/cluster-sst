@@ -122,7 +122,7 @@ SST will handle all the infrastructure provisioning including:
 - ECS Cluster with services
 - Lambda function with public URL
 
-> Note: This does take some time to finish
+> Note: This does take some time to finish. Also the cluster needs a minute to spin up the containers after deployment
 
 > Remember: remove all resources from your AWS account with `pnpm sst remove --stage dev`
 
