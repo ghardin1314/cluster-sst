@@ -4,9 +4,9 @@ import {
   NodeRuntime,
 } from "@effect/platform-node";
 import { Context, Effect, Layer, Logger, LogLevel } from "effect";
+import { Resource } from "sst";
 import { DbLayer } from "./external/db";
 import { inEcs, IpAddress, ipLayer } from "./prelude";
-
 
 const program = ipLayer
   .pipe(
@@ -16,7 +16,7 @@ const program = ipLayer
         shardingConfig: {
           shardManagerAddress: RunnerAddress.make(
             Context.get(ctx, IpAddress),
-            8080
+            Resource.ShardManagerPort.value
           ),
         },
       })

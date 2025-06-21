@@ -21,18 +21,33 @@ declare module "sst" {
       "type": "sst.aws.Function"
       "url": string
     }
+    "ProxyHost": {
+      "type": "sst.sst.Linkable"
+      "value": string
+    }
+    "ProxyPort": {
+      "type": "sst.sst.Linkable"
+      "value": number
+    }
+    "ProxyServer": {
+      "service": string
+      "type": "sst.aws.Service"
+    }
     "Runner": {
       "service": string
       "type": "sst.aws.Service"
     }
-    "ShardConfig": {
-      "SHARD_MANAGER_HOST": string
-      "SHARD_MANAGER_PORT": number
-      "type": "sst.sst.Linkable"
-    }
     "ShardManager": {
       "service": string
       "type": "sst.aws.Service"
+    }
+    "ShardManagerHost": {
+      "type": "sst.sst.Linkable"
+      "value": string
+    }
+    "ShardManagerPort": {
+      "type": "sst.sst.Linkable"
+      "value": number
     }
   }
 }

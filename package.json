@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@effect/language-service": "0.21.7",
     "@types/aws-lambda": "8.10.150",
     "@types/node": "24.0.3",
     "sst": "3.17.5",

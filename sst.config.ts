@@ -31,6 +31,18 @@ export default $config({
       vpc,
     });
 
+    const ShardManagerPort = new sst.Linkable("ShardManagerPort", {
+      properties: {
+        value: 8080,
+      },
+    });
+
+    const ProxyPort = new sst.Linkable("ProxyPort", {
+      properties: {
+        value: 3333,
+      },
+    });
+
     const shardManager = new sst.aws.Service("ShardManager", {
       cluster,
       image: {
@@ -48,16 +60,46 @@ export default $config({
         command: "bun run --watch src/shard-manager.ts",
         directory: "apps/cluster",
       },
-      link: [postgres],
+      link: [postgres, ShardManagerPort],
       capacity: "spot",
     });
 
-    const SHARD_MANAGER_HOST = $dev ? "localhost" : shardManager.service;
-    const SHARD_MANAGER_PORT = 8080;
-     const ShardConfig = new sst.Linkable("ShardConfig", {
+    const ShardManagerHost = new sst.Linkable("ShardManagerHost", {
       properties: {
-        SHARD_MANAGER_HOST,
-        SHARD_MANAGER_PORT,
+        value: $dev ? "localhost" : shardManager.service,
+      },
+    });
+
+    const proxyServer = new sst.aws.Service("ProxyServer", {
+      cluster,
+      image: {
+        context: ".",
+        dockerfile: "apps/cluster/Dockerfile",
+      },
+      environment: {
+        LOG_LEVEL: "DEBUG",
+      },
+      command: $dev
+        ? undefined
+        : ["bun", "run", "apps/cluster/src/proxy/server.ts"],
+      dev: {
+        autostart: true,
+        command: "bun run --watch src/proxy/server.ts",
+        directory: "apps/cluster",
+      },
+      link: [
+        postgres,
+        shardManager,
+        ShardManagerHost,
+        ShardManagerPort,
+        ProxyPort,
+      ],
+      capacity: "spot",
+    });
+
+    const ProxyHost = new sst.Linkable("ProxyHost", {
+      properties: {
+        value: $dev ? "localhost" : proxyServer.service,
       },
     });
 
@@ -102,13 +144,20 @@ export default $config({
         runnerContainer({ index: 2, port: 34433 }),
         runnerContainer({ index: 3, port: 34434 }),
       ],
-      link: [postgres, shardManager, ShardConfig],
+      link: [
+        postgres,
+        shardManager,
+        ShardManagerHost,
+        ShardManagerPort,
+        ProxyHost,
+        ProxyPort,
+      ],
     });
 
     const executeFn = new sst.aws.Function("ExecuteFn", {
       vpc,
       handler: "apps/cluster/src/execute.handler",
-      link: [shardManager, postgres, ShardConfig],
+      link: [shardManager, postgres, ProxyHost, ProxyPort],
       url: true,
       environment: {
         LOG_LEVEL: "DEBUG",

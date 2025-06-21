@@ -12,6 +12,9 @@ importers:
         specifier: 3.17.5
         version: 3.17.5
     devDependencies:
+      '@effect/language-service':
+        specifier: 0.21.7
+        version: 0.21.7
       '@types/aws-lambda':
         specifier: 8.10.150
         version: 8.10.150
@@ -50,12 +53,6 @@ importers:
         specifier: 8.10.150
         version: 8.10.150
 
-  packages/shared:
-    devDependencies:
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
-
 packages:
 
   '@effect-aws/lambda@1.5.1':
@@ -86,6 +83,9 @@ packages:
         optional: true
       lmdb:
         optional: true
+
+  '@effect/language-service@0.21.7':
+    resolution: {integrity: sha512-XUQAAz7zAOdev/hPpwSnPEjqs2qflbHFOoEDK7SsV64LuGd2/QwbvEUCnJai1i9CfAqaMlGA59hG2bgC8FB9IA==}
 
   '@effect/platform-node-shared@0.40.2':
     resolution: {integrity: sha512-f9FbZN1pTMlR4bTwlR/mER9Qqd1MwMdryn3cz5/lapmXvgrRxQ+vgGS15d286mZeoc6aHtXGEr0GgoPNDFscKw==}
@@ -886,6 +886,8 @@ snapshots:
       '@effect/platform': 0.85.1(effect@3.16.8)
       effect: 3.16.8
       uuid: 11.1.0
+
+  '@effect/language-service@0.21.7': {}
 
   '@effect/platform-node-shared@0.40.2(@effect/cluster@0.39.2(@effect/platform@0.85.1(effect@3.16.8))(@effect/rpc@0.62.2(@effect/platform@0.85.1(effect@3.16.8))(effect@3.16.8))(@effect/sql@0.38.1(@effect/experimental@0.49.1(@effect/platform@0.85.1(effect@3.16.8))(effect@3.16.8))(@effect/platform@0.85.1(effect@3.16.8))(effect@3.16.8))(@effect/workflow@0.2.2(@effect/platform@0.85.1(effect@3.16.8))(@effect/rpc@0.62.2(@effect/platform@0.85.1(effect@3.16.8))(effect@3.16.8))(effect@3.16.8))(effect@3.16.8))(@effect/platform@0.85.1(effect@3.16.8))(@effect/rpc@0.62.2(@effect/platform@0.85.1(effect@3.16.8))(effect@3.16.8))(@effect/sql@0.38.1(@effect/experimental@0.49.1(@effect/platform@0.85.1(effect@3.16.8))(effect@3.16.8))(@effect/platform@0.85.1(effect@3.16.8))(effect@3.16.8))(effect@3.16.8)':
     dependencies:
