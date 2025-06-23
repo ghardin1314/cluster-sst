@@ -79,6 +79,13 @@ export default $config({
       environment: {
         LOG_LEVEL: "DEBUG",
       },
+      // Auto scale based on CPU/memory usage
+      scaling: {
+        min: 1,
+        max: 5,
+        cpuUtilization: 70,
+        memoryUtilization: 70,
+      },
       command: $dev
         ? undefined
         : ["bun", "run", "apps/cluster/src/proxy/server.ts"],
