@@ -7,31 +7,17 @@ This repository demonstrates the simplest and most stripped-down way to deploy [
 This project implements a minimal Effect Cluster deployment that includes:
 
 - **Shard Manager**: Central coordinator that manages cluster state and shard distribution
+- **Cluster Proxy**: A private RPC server that connects you application instances to your shards
 - **Runner Services**: Worker nodes that execute business logic and host entities
 - **PostgreSQL Database**: Persistent storage for cluster and message state
-- **Lambda Function**: HTTP endpoint that acts as a client to interact with the cluster
+- **Lambda Function**: HTTP endpoint that acts as a client to interact with the cluster (via the proxy)
 - **AWS Infrastructure**: VPC, ECS Cluster, and managed services via SST
 
-All infrastructure is defined in `sst.config.ts` using standard SST components - no custom or complex configurations required!
+All infrastructure is defined in `sst.config.ts` using standard SST components - no custom or complex configuration required!
 
 ## Architecture
 
-```
-┌─────────────────┐     ┌──────────────────┐
-│  Lambda (HTTP)  │────▶│  Shard Manager   │
-└─────────────────┘     │    (ECS Task)    │
-                        └────────┬─────────┘
-                                 │
-                        ┌────────▼─────────┐
-                        │     Runner(s)    │
-                        │   (ECS Tasks)    │
-                        └────────┬─────────┘
-                                 │
-                        ┌────────▼─────────┐
-                        │   PostgreSQL     │
-                        │   (RDS/Local)    │
-                        └──────────────────┘
-```
+![image](https://github.com/user-attachments/assets/2ecb13b9-ed04-40b3-a992-24b421a5d84c)
 
 ## Getting Started
 
@@ -81,9 +67,8 @@ All infrastructure is defined in `sst.config.ts` using standard SST components -
 ## How It Works
 
 1. **Shard Manager** (`apps/cluster/src/shard-manager.ts`): 
-   - Acts as the cluster coordinator
+   - Assigns shards to different runner instances
    - Uses PostgreSQL to persist cluster state
-   - Manages shard assignment and entity distribution
 
 2. **Runner** (`apps/cluster/src/runner.ts`):
    - Worker nodes that host and execute entities
@@ -94,10 +79,15 @@ All infrastructure is defined in `sst.config.ts` using standard SST components -
    - Business logic encapsulated as Effect entities
    - Example includes a `Greeter` entity with RPC methods
    - Supports persistence and state management
+  
+4. **Cluster Proxy** (`apps/cluster/src/proxy/server.ts`):
+   - A private RPC server that allows application code to connect to cluster entities
+   - Allows serverless functions to be more efficient when starting up since they dont need to connect to full cluster
+   - No public access. Only instances in the same VPC can connect
 
 4. **Lambda Handler** (`apps/cluster/src/execute.ts`):
    - Provides HTTP access to the cluster
-   - Acts as a cluster client using `clientOnly` mode
+   - Communicates to the cluster entities through the proxy
    - Deployed with a public URL for easy testing
 
 ## Key Features
